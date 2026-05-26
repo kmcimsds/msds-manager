@@ -1,1 +1,29 @@
-[]
+[
+  {
+    "uuid": "R3-CASE1-1779772375703",
+    "category": "MDI",
+    "chemical_name": "JG-70K",
+    "cas_no": "3214-6598",
+    "manufacturer": "?????",
+    "msds_uploaded": true,
+    "pdf_link": "https://github.com/kmcimsds/msds-manager/blob/main/%EC%97%B0%EA%B5%AC3%ED%8C%80/CASE1/msds/R3-CASE1-1779772375703.pdf"
+  },
+  {
+    "uuid": "R3-CASE1-1779772377399",
+    "category": "??",
+    "chemical_name": "Acetone",
+    "cas_no": "1234-5678",
+    "manufacturer": "TCI",
+    "msds_uploaded": false,
+    "pdf_link": ""
+  },
+  {
+    "uuid": "R3-CASE1-1779777238910",
+    "category": "??",
+    "chemical_name": "MPPO??",
+    "cas_no": "1111-5454",
+    "manufacturer": "",
+    "msds_uploaded": false,
+    "pdf_link": ""
+  }
+]
