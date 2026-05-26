@@ -1,32 +1,63 @@
-const jsonUrls = [
+const resultArea =
+  document.getElementById("resultArea");
 
-  "https://raw.githubusercontent.com/kmcimsds/msds-manager/main/%EC%97%B0%EA%B5%AC3%ED%8C%80/CASE1/chemical-list.json",
+const searchInput =
+  document.getElementById("searchInput");
 
-  "https://raw.githubusercontent.com/kmcimsds/msds-manager/main/%EC%97%B0%EA%B5%AC3%ED%8C%80/CASE2/chemical-list.json",
 
-  "https://raw.githubusercontent.com/kmcimsds/msds-manager/main/%EC%97%B0%EA%B5%AC3%ED%8C%80/%EB%AC%BC%EC%84%B1%EC%8B%A42/chemical-list.json",
+// ------------------------------------
+// JSON 경로
+// ------------------------------------
 
-  "https://raw.githubusercontent.com/kmcimsds/msds-manager/main/%EC%97%B0%EA%B5%AC3%ED%8C%80/%EB%A8%B8%EC%8B%A0%EB%A3%B8/chemical-list.json",
+const jsonFiles = [
 
-  "https://raw.githubusercontent.com/kmcimsds/msds-manager/main/%EC%97%B0%EA%B5%AC3%ED%8C%80/%ED%99%94%ED%95%99%EC%B0%BD%EA%B3%A0/chemical-list.json",
-
-  "https://raw.githubusercontent.com/kmcimsds/msds-manager/main/%EC%97%B0%EA%B5%AC3%ED%8C%80/%EC%95%BC%EC%A0%81%EC%9E%A5/chemical-list.json"
+  "./연구3팀/CASE1/chemical-list.json",
+  "./연구3팀/CASE2/chemical-list.json",
+  "./연구3팀/물성실2/chemical-list.json",
+  "./연구3팀/머신룸/chemical-list.json",
+  "./연구3팀/화학창고/chemical-list.json",
+  "./연구3팀/야적장/chemical-list.json"
 
 ];
 
-let chemicalData = [];
 
-async function loadAllData() {
+// ------------------------------------
+// 전체 데이터 저장
+// ------------------------------------
 
-  for (const url of jsonUrls) {
+let allChemicals = [];
+
+
+// ------------------------------------
+// JSON 로드
+// ------------------------------------
+
+async function loadAllChemicals() {
+
+  for (const file of jsonFiles) {
 
     try {
 
-      const response = await fetch(url);
+      const response = await fetch(file);
+
+      if (!response.ok) continue;
 
       const data = await response.json();
 
-      chemicalData.push(...data);
+      const mapped = data.map(item => {
+
+        return {
+
+          ...item,
+
+          location:
+            file.split("/")[1]
+
+        };
+
+      });
+
+      allChemicals.push(...mapped);
 
     } catch (error) {
 
@@ -36,46 +67,72 @@ async function loadAllData() {
 
   }
 
+  renderChemicals(allChemicals);
+
 }
 
-function renderResults(keyword) {
 
-  const resultArea =
-    document.getElementById("resultArea");
+// ------------------------------------
+// 화면 출력
+// ------------------------------------
+
+function renderChemicals(list) {
 
   resultArea.innerHTML = "";
 
-  const filtered =
-    chemicalData.filter(item =>
-      item.chemical_name
-        .toLowerCase()
-        .includes(keyword.toLowerCase())
-    );
+  if (list.length === 0) {
 
-  filtered.forEach(item => {
+    resultArea.innerHTML =
+      `<p class="empty">검색 결과가 없습니다.</p>`;
 
-    const card = document.createElement("div");
+    return;
 
-    card.className = "card";
+  }
 
-    const pdfUrl =
-      item.pdf_link;
+  list.forEach(item => {
+
+    const card =
+      document.createElement("div");
+
+    card.className = "chemical-card";
+
+    const pdfLink =
+      item.pdf_link
+        ? item.pdf_link
+        : "#";
+
+    const buttonText =
+      item.msds_uploaded
+        ? "MSDS 열기"
+        : "PDF 없음";
 
     card.innerHTML = `
 
-      <h3>${item.chemical_name}</h3>
+      <div class="card-header">
+        ${item.chemical_name}
+      </div>
 
-      <p><strong>CAS No:</strong> ${item.cas_no || "-"}</p>
+      <div class="card-body">
 
-      <p><strong>제조사:</strong> ${item.manufacturer || "-"}</p>
+        <p><strong>분류:</strong> ${item.category || "-"}</p>
 
-      <p><strong>UUID:</strong> ${item.uuid}</p>
+        <p><strong>CAS No:</strong> ${item.cas_no || "-"}</p>
 
-      ${
-        item.msds_uploaded
-          ? `<a class="pdf-btn" href="${pdfUrl}" target="_blank">MSDS 보기</a>`
-          : `<span>MSDS 미업로드</span>`
-      }
+        <p><strong>제조사:</strong> ${item.manufacturer || "-"}</p>
+
+      </div>
+
+      <div class="card-footer">
+
+        <a
+          href="${pdfLink}"
+          target="_blank"
+          class="pdf-button"
+        >
+          ${buttonText}
+        </a>
+
+      </div>
 
     `;
 
@@ -85,12 +142,37 @@ function renderResults(keyword) {
 
 }
 
-document
-  .getElementById("searchInput")
-  .addEventListener("input", e => {
 
-    renderResults(e.target.value);
+// ------------------------------------
+// 검색
+// ------------------------------------
 
-  });
+searchInput.addEventListener("input", () => {
 
-loadAllData();
+  const keyword =
+    searchInput.value.toLowerCase();
+
+  const filtered =
+    allChemicals.filter(item => {
+
+      return (
+
+        item.chemical_name &&
+        item.chemical_name
+          .toLowerCase()
+          .includes(keyword)
+
+      );
+
+    });
+
+  renderChemicals(filtered);
+
+});
+
+
+// ------------------------------------
+// 시작
+// ------------------------------------
+
+loadAllChemicals();
