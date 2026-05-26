@@ -1,131 +1,32 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <title>MSDS 관리 시스템</title>
+  <title>KMC MSDS 시스템</title>
 
-  <style>
+  <link rel="stylesheet" href="style.css">
 
-    body{
-      font-family: Arial;
-      margin:40px;
-      background:#f5f5f5;
-    }
-
-    h1{
-      margin-bottom:30px;
-    }
-
-    .card{
-      background:white;
-      padding:20px;
-      margin-bottom:20px;
-      border-radius:10px;
-      box-shadow:0 2px 5px rgba(0,0,0,0.1);
-    }
-
-    table{
-      width:100%;
-      border-collapse:collapse;
-      margin-top:10px;
-    }
-
-    th, td{
-      border:1px solid #ddd;
-      padding:10px;
-      text-align:left;
-    }
-
-    th{
-      background:#f0f0f0;
-    }
-
-    a{
-      text-decoration:none;
-      color:blue;
-      font-weight:bold;
-    }
-
-  </style>
 </head>
 <body>
 
-  <h1>MSDS 관리 시스템</h1>
+  <div class="container">
 
-  <div class="card">
+    <h1>KMC MSDS 시스템</h1>
 
-    <h2>연구3팀 - CASE1</h2>
+    <input
+      type="text"
+      id="searchInput"
+      placeholder="시약명 검색"
+    >
 
-    <table>
-
-      <thead>
-        <tr>
-          <th>구분</th>
-          <th>화학물질명</th>
-          <th>CAS No</th>
-          <th>제조사</th>
-          <th>MSDS</th>
-        </tr>
-      </thead>
-
-      <tbody id="chemicalTable"></tbody>
-
-    </table>
+    <div id="resultArea"></div>
 
   </div>
 
-<script>
-
-async function loadChemicals(){
-
-  const url =
-    "https://raw.githubusercontent.com/kmcimsds/msds-manager/main/%EC%97%B0%EA%B5%AC3%ED%8C%80/CASE1/chemical-list.json";
-
-  const response = await fetch(url);
-
-  const data = await response.json();
-
-  const table =
-    document.getElementById("chemicalTable");
-
-  table.innerHTML = "";
-
-  data.forEach(item => {
-
-    const tr = document.createElement("tr");
-
-    let pdfButton = "";
-
-    if(item.msds_uploaded){
-
-      pdfButton =
-        `<a href="${item.pdf_link}" target="_blank">📄 보기</a>`;
-
-    }else{
-
-      pdfButton = "미등록";
-
-    }
-
-    tr.innerHTML = `
-      <td>${item.category}</td>
-      <td>${item.chemical_name}</td>
-      <td>${item.cas_no}</td>
-      <td>${item.manufacturer}</td>
-      <td>${pdfButton}</td>
-    `;
-
-    table.appendChild(tr);
-
-  });
-
-}
-
-loadChemicals();
-
-</script>
+  <script src="script.js"></script>
 
 </body>
 </html>
