@@ -1,59 +1,147 @@
+* {
+
+  box-sizing: border-box;
+
+}
+
 body {
 
-  font-family: Arial, sans-serif;
-  background: #f5f5f5;
   margin: 0;
-  padding: 30px;
+  font-family: Arial, sans-serif;
+  background: #0f172a;
+  color: white;
 
 }
 
-.container {
+.layout {
 
-  max-width: 1000px;
-  margin: auto;
-  background: white;
-  padding: 30px;
-  border-radius: 10px;
+  display: flex;
+  min-height: 100vh;
 
 }
 
-h1 {
+.sidebar {
 
-  margin-bottom: 20px;
+  width: 240px;
+  background: #111827;
+  padding: 40px 20px;
+  border-right: 1px solid #1f2937;
+
+}
+
+.sidebar h2 {
+
+  margin: 0;
+  font-size: 32px;
+
+}
+
+.sidebar p {
+
+  margin-top: 10px;
+  color: #94a3b8;
+  font-size: 14px;
+
+}
+
+.main {
+
+  flex: 1;
+  padding: 40px;
+
+}
+
+.topbar {
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  gap: 20px;
+
+}
+
+.topbar h1 {
+
+  margin: 0;
+  font-size: 28px;
 
 }
 
 #searchInput {
 
-  width: 100%;
-  padding: 12px;
-  font-size: 16px;
-  margin-bottom: 20px;
+  width: 320px;
+  padding: 14px;
+  border: none;
+  border-radius: 10px;
+  background: #1e293b;
+  color: white;
+  font-size: 15px;
+
+}
+
+#searchInput::placeholder {
+
+  color: #94a3b8;
+
+}
+
+.result-grid {
+
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 20px;
 
 }
 
 .card {
 
-  border: 1px solid #ddd;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 8px;
+  background: #1e293b;
+  border-radius: 14px;
+  padding: 20px;
+  border: 1px solid #334155;
+
+  transition: 0.2s;
+
+}
+
+.card:hover {
+
+  transform: translateY(-4px);
 
 }
 
 .card h3 {
 
-  margin: 0 0 10px 0;
+  margin-top: 0;
+  margin-bottom: 15px;
+  font-size: 20px;
+
+}
+
+.card p {
+
+  margin: 8px 0;
+  color: #cbd5e1;
 
 }
 
 .pdf-btn {
 
   display: inline-block;
-  padding: 8px 12px;
-  background: #007bff;
+  margin-top: 15px;
+  padding: 10px 14px;
+  background: #2563eb;
   color: white;
   text-decoration: none;
-  border-radius: 5px;
+  border-radius: 8px;
+
+  transition: 0.2s;
+
+}
+
+.pdf-btn:hover {
+
+  background: #1d4ed8;
 
 }
