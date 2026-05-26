@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MSDS 뷰어 - 물질안전보건자료</title>
+    <style>
+        /* === RESET & BASE STYLES === */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        /* === HEADER SECTION === */
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 1rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo img {
+            height: 45px;
+            width: auto;
+            object-fit: contain;
+        }
+
+        .header-title {
+            flex: 1;
+        }
+
+        .header-title h1 {
+            font-size: 1.8rem;
+            font-weight: 600;
+            margin-bottom: 0.3rem;
+        }
+
+        .header-title p {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        /* === SEARCH SECTION === */
+        .search-container {
+            max-width: 1400px;
+            margin: -1.5rem auto 2rem;
+            padding: 0 1rem;
+        }
+
+        .search-box {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group {
+            position: relative;
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 1rem;
+            color: #667eea;
+            font-size: 1.2rem;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 1rem 3.5rem 1rem 3rem; /* Extra padding for clear button */
+            font-size: 1rem;
+            border: 2px solid #e0e7ff;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            height: 100%;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .clear-btn {
+            position: absolute;
+            right: 1rem;
+            background: none;
+            border: none;
+            color: #999;
+            font-size: 1.2rem;
+            cursor: pointer;
+            padding: 0.5rem;
+            display: none;
+            transition: color 0.2s;
+            z-index: 2;
+        }
+
+        .clear-btn:hover {
+            color: #667eea;
+        }
+
+        /* === MAIN CONTENT === */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem 2rem;
+            display: grid;
+            grid-template-columns: 350px 1fr;
+            gap: 2rem;
+        }
+
+        /* === FILE LIST SECTION === */
+        .file-list-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            height: fit-content;
+            max-height: calc(100vh - 250px);
+            overflow-y: auto;
+        }
+
+        .file-list-header {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #667eea;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .file-count {
+            font-size: 0.9rem;
+            color: #666;
+            font-weight: normal;
+        }
+
+        .file-list {
+            list-style: none;
+        }
+
+        .folder-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .folder-header {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #667eea;
+            padding: 0.7rem 0.5rem;
+            margin-bottom: 0.5rem;
+            border-bottom: 2px solid #e0e7ff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+
+        .folder-header:hover {
+            background: #f8f9fc;
+            border-radius: 6px;
+        }
+
+        .folder-header::before {
+            content: "📂";
+            font-size: 1.2rem;
+            transition: transform 0.2s ease;
+        }
+
+        .folder-header.collapsed::before {
+            content: "📁";
+        }
+
+        .folder-files {
+            overflow: hidden;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+        }
+
+        .folder-files.collapsed {
+            max-height: 0 !important;
+            opacity: 0;
+        }
+
+        .file-item {
+            padding: 0.9rem;
+            margin-bottom: 0.5rem;
+            margin-left: 1rem;
+            background: #f8f9fc;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.7rem;
+        }
+
+        .file-item::before {
+            content: "📄";
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .file-item:hover {
+            background: #e0e7ff;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .file-item.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .file-item.active::before {
+            filter: grayscale(1) brightness(2);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: #999;
+            font-size: 1rem;
+        }
+
+        .no-results::before {
+            content: "🔍";
+            display: block;
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        /* === VIEWER SECTION === */
+        .viewer-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .viewer-header {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: #333;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .viewer-title {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .open-new-tab {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: none;
+        }
+
+        .open-new-tab:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .viewer-placeholder {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fc;
+            border-radius: 8px;
+            min-height: 500px;
+            color: #999;
+            font-size: 1.1rem;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .viewer-placeholder::before {
+            content: "📋";
+            font-size: 4rem;
+        }
+
+        #pdfViewer {
+            width: 100%;
+            height: calc(100vh - 300px);
+            border: none;
+            border-radius: 8px;
+            display: none;
+        }
+
+        #pdfViewer.active {
+            display: block;
+        }
+
+        /* === LOADING SPINNER === */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            color: #667eea;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .spinner {
+            border: 4px solid #f3f4f6;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* === RESPONSIVE DESIGN === */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+                gap: 1rem;
+            }
+
+            .file-list-section {
+                max-height: 300px;
+            }
+
+            #pdfViewer {
+                height: 600px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .header-title h1 {
+                font-size: 1.5rem;
+            }
+
+            .logo img {
+                height: 35px;
+            }
+
+            .search-container {
+                margin-top: -1rem;
+            }
+
+            .viewer-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+
+            .open-new-tab {
+                width: 100%;
+            }
+        }
+
+        /* === SCROLLBAR STYLING === */
+        .file-list-section::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .file-list-section::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        .file-list-section::-webkit-scrollbar-thumb {
+            background: #667eea;
+            border-radius: 10px;
+        }
+
+        .file-list-section::-webkit-scrollbar-thumb:hover {
+            background: #5568d3;
+        }
+        @media (max-width: 480px) {
+            .header {
+                padding: 1.5rem 0.5rem;
+            }
+
+            .logo img {
+                height: 30px;
+            }
+
+            .header-title h1 {
+                font-size: 1.3rem;
+            }
+
+            .search-input-wrapper {
+                flex-direction: column;
+            }
+
+            .input-group {
+                width: 100%;
+            }
+
+            .search-box {
+                padding: 1rem;
+            }
+
+            .container {
+                padding: 0 0.5rem 1rem;
+            }
+
+            .file-list-section {
+                padding: 1rem;
+            }
+
+            .viewer-section {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- === HEADER === -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <img src="logo.png" alt="금호미쓰이화학">
+            </div>
+            <div class="header-title">
+                <h1>물질안전보건자료 검색</h1>
+                <p>Material Safety Data Sheet Viewer</p>
+            </div>
+        </div>
+    </header>
+
+    <!-- === SEARCH === -->
+    <div class="search-container">
+        <div class="search-box">
+            <div class="search-input-wrapper">
+                <div class="input-group">
+                    <span class="search-icon">🔍</span>
+                    <input 
+                        type="text" 
+                        id="searchInput" 
+                        placeholder="물질명을 입력하세요 (예: 메탄올, Methanol)"
+                        autocomplete="off"
+                    >
+                    <button class="clear-btn" id="clearBtn" title="검색어 지우기">✕</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- === MAIN CONTENT === -->
+    <div class="container">
+        <!-- FILE LIST -->
+        <aside class="file-list-section">
+            <div class="file-list-header">
+                파일 목록
+                <span class="file-count" id="fileCount">(0)</span>
+            </div>
+            <div class="loading active">
+                <div class="spinner"></div>
+                <div>파일 목록을 불러오는 중...</div>
+            </div>
+            <ul class="file-list" id="fileList"></ul>
+            <div class="no-results" id="noResults" style="display: none;">
+                검색 결과가 없습니다
+            </div>
+        </aside>
+
+        <!-- VIEWER -->
+        <main class="viewer-section">
+            <div class="viewer-header">
+                <div class="viewer-title">
+                    <span>📄</span>
+                    <span id="currentFileName">미리보기</span>
+                </div>
+                <button class="open-new-tab" id="openNewTab">새 탭에서 열기</button>
+            </div>
+            <div class="viewer-placeholder" id="viewerPlaceholder">
+                좌측 목록에서 파일을 선택하세요
+            </div>
+            <iframe id="pdfViewer" title="PDF Viewer"></iframe>
+        </main>
+    </div>
+
+    <!-- === JAVASCRIPT === -->
+    <script>
+        // === DATA & STATE MANAGEMENT ===
+        let filesData = [];
+        let currentPdfPath = '';
+
+        // === DOM ELEMENTS ===
+        const searchInput = document.getElementById('searchInput');
+        const clearBtn = document.getElementById('clearBtn');
+        const fileList = document.getElementById('fileList');
+        const fileCount = document.getElementById('fileCount');
+        const noResults = document.getElementById('noResults');
+        const pdfViewer = document.getElementById('pdfViewer');
+        const viewerPlaceholder = document.getElementById('viewerPlaceholder');
+        const currentFileName = document.getElementById('currentFileName');
+        const openNewTabBtn = document.getElementById('openNewTab');
+        const loading = document.querySelector('.loading');
+
+        // === INITIALIZE APP ===
+        async function init() {
+            try {
+                await loadFilesData();
+                renderFileList(filesData);
+                setupEventListeners();
+            } catch (error) {
+                console.error('초기화 오류:', error);
+                showError('파일 목록을 불러오는데 실패했습니다.');
+            }
+        }
+
+        // === LOAD FILES DATA ===
+        async function loadFilesData() {
+            try {
+                const response = await fetch('files.json');
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                filesData = await response.json();
+                loading.classList.remove('active');
+            } catch (error) {
+                console.error('파일 로딩 오류:', error);
+                loading.classList.remove('active');
+                throw error;
+            }
+        }
+
+        // === RENDER FILE LIST ===
+        function renderFileList(files, isSearching = false) {
+            fileList.innerHTML = '';
+            
+            if (files.length === 0) {
+                noResults.style.display = 'block';
+                fileList.style.display = 'none';
+            } else {
+                noResults.style.display = 'none';
+                fileList.style.display = 'block';
+                
+                // 폴더별로 그룹화
+                const groupedFiles = groupFilesByFolder(files);
+                
+                // 각 폴더 그룹 렌더링
+                Object.keys(groupedFiles).forEach(folder => {
+                    const folderGroup = document.createElement('div');
+                    folderGroup.className = 'folder-group';
+                    
+                    // 폴더 헤더 (최상위 파일이 아닌 경우만 표시)
+                    if (folder !== '__root__') {
+                        const folderHeader = document.createElement('div');
+                        folderHeader.className = 'folder-header';
+                        folderHeader.textContent = folder;
+                        
+                        // 폴더 파일 컨테이너
+                        const folderFiles = document.createElement('div');
+                        folderFiles.className = 'folder-files';
+                        
+                        // 폴더 내 파일들
+                        groupedFiles[folder].forEach(file => {
+                            const li = document.createElement('li');
+                            li.className = 'file-item';
+                            li.textContent = file.name;
+                            li.dataset.path = file.path;
+                            li.addEventListener('click', () => loadPdf(file.path, file.name, li));
+                            folderFiles.appendChild(li);
+                        });
+                        
+                        // 초기 상태: 검색 중이면 펼침, 아니면 접힘
+                        if (!isSearching) {
+                            folderHeader.classList.add('collapsed');
+                            folderFiles.classList.add('collapsed');
+                        }
+                        
+                        // 폴더 접기/펼치기 이벤트
+                        folderHeader.addEventListener('click', (e) => {
+                            e.stopPropagation();
+                            folderHeader.classList.toggle('collapsed');
+                            folderFiles.classList.toggle('collapsed');
+                            
+                            // 높이 재계산
+                            if (!folderFiles.classList.contains('collapsed')) {
+                                folderFiles.style.maxHeight = folderFiles.scrollHeight + 'px';
+                            }
+                        });
+                        
+                        folderGroup.appendChild(folderHeader);
+                        folderGroup.appendChild(folderFiles);
+                        
+                        // 펼쳐진 상태일 때만 높이 설정
+                        setTimeout(() => {
+                            if (!folderFiles.classList.contains('collapsed')) {
+                                folderFiles.style.maxHeight = folderFiles.scrollHeight + 'px';
+                            }
+                        }, 0);
+                    } else {
+                        // 최상위 파일들 (폴더 헤더 없음) - 항상 맨 위에 표시
+                        groupedFiles[folder].forEach(file => {
+                            const li = document.createElement('li');
+                            li.className = 'file-item';
+                            li.style.marginLeft = '0';
+                            li.textContent = file.name;
+                            li.dataset.path = file.path;
+                            li.addEventListener('click', () => loadPdf(file.path, file.name, li));
+                            folderGroup.appendChild(li);
+                        });
+                    }
+                    
+                    fileList.appendChild(folderGroup);
+                });
+            }
+            
+            updateFileCount(files.length);
+        }
+
+        // === GROUP FILES BY FOLDER ===
+        function groupFilesByFolder(files) {
+            const grouped = {};
+            
+            files.forEach(file => {
+                const pathParts = file.path.split('/');
+                let folderName = '__root__'; // 최상위 파일용 특수 키
+                
+                if (pathParts.length > 1) {
+                    // 파일명 전까지의 모든 폴더 경로를 사용
+                    folderName = pathParts.slice(0, -1).join('/');
+                }
+                
+                if (!grouped[folderName]) {
+                    grouped[folderName] = [];
+                }
+                grouped[folderName].push(file);
+            });
+            
+            // __root__ 파일들을 먼저 표시하기 위해 정렬 순서 조정
+            const sorted = {};
+            if (grouped['__root__']) {
+                sorted['__root__'] = grouped['__root__'];
+            }
+            Object.keys(grouped).sort().forEach(key => {
+                if (key !== '__root__') {
+                    sorted[key] = grouped[key];
+                }
+            });
+            
+            return sorted;
+        }
+
+        // === UPDATE FILE COUNT ===
+        function updateFileCount(count) {
+            fileCount.textContent = `(${count})`;
+        }
+
+        // === SEARCH FILTER ===
+        function filterFiles(searchTerm) {
+            const isSearching = searchTerm.trim().length > 0;
+            
+            if (isSearching) {
+                // 검색어가 있으면 필터링하고 폴더 펼침
+                const filtered = filesData.filter(file => 
+                    file.name.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+                renderFileList(filtered, true);
+            } else {
+                // 검색어가 없으면 전체 표시하고 폴더 접힘 (초기 상태)
+                renderFileList(filesData, false);
+            }
+        }
+
+        // === GET BASE URL ===
+        function getBaseUrl() {
+            return window.location.origin + window.location.pathname.replace(/\/index\.html$/i, '/').replace(/\/+$/, '/');
+        }
+
+        // === GET FULL PDF URL ===
+        function getFullPdfUrl(path) {
+            return getBaseUrl() + encodeURIComponent(path).replace(/%2F/g, '/');
+        }
+
+        // === LOAD PDF IN VIEWER ===
+        function loadPdf(path, name, clickedElement) {
+            try {
+                currentPdfPath = path;
+                
+                const fullPdfUrl = getFullPdfUrl(path);
+
+                // Google Docs Viewer: 삼성인터넷, 크롬, 사파리 등 모든 브라우저 호환
+                const viewerUrl = `https://docs.google.com/gview?embedded=true&url=${encodeURIComponent(fullPdfUrl)}`;
+                
+                // Update UI
+                pdfViewer.src = viewerUrl;
+                pdfViewer.classList.add('active');
+                viewerPlaceholder.style.display = 'none';
+                currentFileName.textContent = name;
+                openNewTabBtn.style.display = 'block';
+                
+                // Update active state in file list
+                document.querySelectorAll('.file-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                if (clickedElement) {
+                    clickedElement.classList.add('active');
+                }
+                
+            } catch (error) {
+                console.error('PDF 로딩 오류:', error);
+                showError('PDF를 불러오는데 실패했습니다.');
+            }
+        }
+
+        // === OPEN PDF IN NEW TAB ===
+        function openInNewTab() {
+            if (currentPdfPath) {
+                const fullPdfUrl = getFullPdfUrl(currentPdfPath);
+                // 직접 PDF 링크로 열기 (브라우저 내장 뷰어 또는 다운로드)
+                window.open(fullPdfUrl, '_blank');
+            }
+        }
+
+        // === SETUP EVENT LISTENERS ===
+        function setupEventListeners() {
+            // Search input
+            searchInput.addEventListener('input', (e) => {
+                const value = e.target.value;
+                clearBtn.style.display = value ? 'block' : 'none';
+                filterFiles(value);
+            });
+
+            // Clear button
+            clearBtn.addEventListener('click', () => {
+                searchInput.value = '';
+                clearBtn.style.display = 'none';
+                filterFiles('');
+                searchInput.focus();
+            });
+
+            // Keyboard: Enter key in search input
+            searchInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') {
+                    filterFiles(searchInput.value);
+                }
+            });
+
+            // Open in new tab button
+            openNewTabBtn.addEventListener('click', openInNewTab);
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', (e) => {
+                // Ctrl/Cmd + F: Focus search
+                if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                    e.preventDefault();
+                    searchInput.focus();
+                }
+                
+                // Escape: Clear search
+                if (e.key === 'Escape' && document.activeElement === searchInput) {
+                    searchInput.value = '';
+                    filterFiles('');
+                }
+            });
+        }
+
+        // === ERROR HANDLING ===
+        function showError(message) {
+            loading.classList.remove('active');
+            fileList.innerHTML = `
+                <div style="text-align: center; padding: 2rem; color: #e74c3c;">
+                    <div style="font-size: 2rem; margin-bottom: 1rem;">⚠️</div>
+                    <div>${message}</div>
+                </div>
+            `;
+        }
+
+        // === START APPLICATION ===
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
+
